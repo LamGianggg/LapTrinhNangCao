@@ -5,7 +5,7 @@ namespace ExampleCAdvance.IHinh
     public class HinhTron : IHinh
     {
         private double banKinh;
-
+        
         public HinhTron(double banKinh)
         {
             this.banKinh = banKinh;
