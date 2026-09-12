@@ -47,6 +47,10 @@ class Program
             Console.WriteLine("Nhap sai, nhap lai!");
         }
 
-        Console.WriteLine("a+b+c=" + (a + b + c));
+        var sum = a + b + c;
+        dynamic d = 5.7;
+        d = "xin chao";
+
+        Console.WriteLine(d);
     }
 }
