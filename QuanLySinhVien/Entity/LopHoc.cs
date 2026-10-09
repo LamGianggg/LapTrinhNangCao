@@ -25,5 +25,10 @@ namespace QuanLySinhVien.Entity
             validationResults = new List<ValidationResult>();
             return Validator.TryValidateObject(this, new ValidationContext(this), validationResults, true);
         }
-    }
+    
+        public bool Validate(out IList<ValidationResult> validationResults)
+        {
+            return IsValid(out validationResults);
+        }
+}
 }

@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using QuanLySinhVien.Entity;
@@ -12,6 +13,7 @@ namespace QuanLySinhVien
         private bool updatingStudentId;
         private bool existingStudent;
         private bool bindingStudents;
+        private bool isLoaded;
 
         public Form1() : this(new InMemoryStudentRepository())
         {
@@ -28,7 +30,9 @@ namespace QuanLySinhVien
             InitializeComponent();
             ConfigureExistingControls();
 
+            // Đăng ký các sự kiện
             dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
+            dataGridView1.CellClick += dataGridView1_CellClick;
             button1.Click += button1_Click;
             button2.Click += button2_Click;
             button3.Click += button3_Click;
@@ -39,110 +43,146 @@ namespace QuanLySinhVien
 
         private void ConfigureExistingControls()
         {
-            Text = "Quản lý sinh viên";
+            Text = "Ứng dụng quản lý sinh viên";
             StartPosition = FormStartPosition.CenterScreen;
-            BackColor = System.Drawing.Color.WhiteSmoke;
+            BackColor = Color.FromArgb(245, 247, 250);
 
+            // ==========================================
+            // THIẾT LẬP THỨ TỰ TAB: TRÊN XUỐNG DƯỚI, TRÁI QUA PHẢI
+            // ==========================================
+            // Cột 1 (trái, trên xuống dưới): Mã SV -> Ngày sinh -> Email
             textBox1.TabIndex = 0;
-            textBox1.Width = 125;
-            textBox7.TabIndex = 1;
-            textBox7.Width = 170;
-            comboBox1.TabIndex = 2;
-            comboBox1.Width = 155;
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            dateTimePicker1.TabIndex = 3;
-            dateTimePicker1.Width = 120;
-            dateTimePicker1.Format = DateTimePickerFormat.Short;
+            dateTimePicker1.TabIndex = 1;
+            textBox4.TabIndex = 2;
+
+            // Cột 2 (giữa, trên xuống dưới): Họ tên -> Giới tính -> Điện thoại
+            textBox7.TabIndex = 3;
             radioButton1.TabIndex = 4;
             radioButton2.TabIndex = 5;
-            numericUpDown1.TabIndex = 6;
+            textBox2.TabIndex = 6;
+
+            // Cột 3 (phải, trên xuống dưới): Lớp học -> Điểm -> Trạng thái
+            comboBox1.TabIndex = 7;
+            numericUpDown1.TabIndex = 8;
+            comboBox2.TabIndex = 9;
+
+            // Các nút hành động bên dưới thông tin sinh viên
+            button3.TabIndex = 10;
+            button4.TabIndex = 11;
+            button5.TabIndex = 12;
+            button6.TabIndex = 13;
+
+            // Khu vực tìm kiếm / lọc
+            textBox5.TabIndex = 14;
+            comboBox3.TabIndex = 15;
+            textBox6.TabIndex = 16;
+            button1.TabIndex = 17;
+            button2.TabIndex = 18;
+
+            // Danh sách sinh viên
+            dataGridView1.TabIndex = 19;
+
+            // ==========================================
+            // CẤU HÌNH ĐỊNH DẠNG CÁC ĐIỀU KHIỂN NHẬP
+            // ==========================================
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+            
+            dateTimePicker1.Format = DateTimePickerFormat.Custom;
+            dateTimePicker1.CustomFormat = "dd/MM/yyyy";
+
             numericUpDown1.Minimum = 0;
             numericUpDown1.Maximum = 10;
-            numericUpDown1.DecimalPlaces = 2;
-            numericUpDown1.Increment = 0.25m;
-            textBox4.TabIndex = 7;
-            textBox4.Width = 120;
-            textBox2.TabIndex = 8;
-            textBox2.Width = 150;
-            comboBox2.TabIndex = 9;
-            comboBox2.Width = 155;
+            numericUpDown1.DecimalPlaces = 1;
+            numericUpDown1.Increment = 0.1m;
+
             comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox2.Items.Clear();
-            comboBox2.Items.AddRange(new object[] { "Đang học", "Nghỉ học" });
+            comboBox2.Items.AddRange(new object[] { "Đang học", "Nghỉ học", "Bảo lưu" });
 
-            button3.Text = "Thêm";
-            button3.Width = 80;
-            button3.Location = new System.Drawing.Point(330, 167);
-            button4.Text = "Cập nhật";
-            button4.Width = 95;
-            button4.Location = new System.Drawing.Point(418, 167);
-            button5.Text = "Xóa";
-            button5.Width = 80;
-            button5.Location = new System.Drawing.Point(521, 167);
-            button6.Text = "Làm mới";
-            button6.Width = 100;
-            button6.Location = new System.Drawing.Point(609, 167);
-
-            textBox5.TabIndex = 0;
-            comboBox3.TabIndex = 1;
             comboBox3.DropDownStyle = ComboBoxStyle.DropDownList;
-            textBox6.TabIndex = 2;
-            button2.Text = "Bỏ lọc";
-            button2.TabIndex = 3;
-            button1.Text = "Tìm kiếm";
-            button1.TabIndex = 4;
-            textBox3.ReadOnly = true;
-            textBox3.TabStop = false;
 
-            groupBox1.TabStop = false;
-            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.TabStop = false;
-            groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox3.TabStop = false;
-            groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            // ==========================================
+            // CẤU HÌNH CÁC NÚT BẤM (TEXT, MÀU SẮC NHƯ MẪU)
+            // ==========================================
+            button3.Text = "Thêm";
+            button3.BackColor = Color.FromArgb(40, 167, 69);
+            button3.ForeColor = Color.White;
+            button3.FlatStyle = FlatStyle.Flat;
+            button3.FlatAppearance.BorderSize = 0;
+
+            button4.Text = "Sửa";
+            button4.BackColor = Color.FromArgb(23, 110, 185);
+            button4.ForeColor = Color.White;
+            button4.FlatStyle = FlatStyle.Flat;
+            button4.FlatAppearance.BorderSize = 0;
+
+            button5.Text = "Xóa";
+            button5.BackColor = Color.FromArgb(220, 53, 69);
+            button5.ForeColor = Color.White;
+            button5.FlatStyle = FlatStyle.Flat;
+            button5.FlatAppearance.BorderSize = 0;
+
+            button6.Text = "Làm mới";
+            button6.BackColor = Color.FromArgb(108, 117, 125);
+            button6.ForeColor = Color.White;
+            button6.FlatStyle = FlatStyle.Flat;
+            button6.FlatAppearance.BorderSize = 0;
+
+            button1.Text = "Tìm kiếm";
+            button1.BackColor = Color.FromArgb(23, 110, 185);
+            button1.ForeColor = Color.White;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.FlatAppearance.BorderSize = 0;
+
+            button2.Text = "Hiển thị tất cả";
+            button2.BackColor = Color.FromArgb(240, 240, 240);
+            button2.ForeColor = Color.Black;
+
+            // ==========================================
+            // CẤU HÌNH DATAGRIDVIEW
+            // ==========================================
             dataGridView1.ReadOnly = true;
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.MultiSelect = false;
             dataGridView1.RowHeadersVisible = false;
             dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView1.BackgroundColor = System.Drawing.Color.White;
+            dataGridView1.BackgroundColor = Color.White;
 
-            groupBox1.TabIndex = 0;
-            button3.TabIndex = 1;
-            button4.TabIndex = 2;
-            button5.TabIndex = 3;
-            button6.TabIndex = 4;
-            groupBox2.TabIndex = 5;
-            groupBox3.TabIndex = 6;
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void label1_Click_1(object sender, EventArgs e)
-        {
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
+            label3.Font = new Font(label3.Font, FontStyle.Bold);
+            textBox3.Visible = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             try
             {
+                isLoaded = false;
+
+                // Lấy về danh sách lớp học hiển thị combobox
                 BindClasses();
+
+                // Lấy về danh sinh viên hiển thị data gridview
                 RefreshStudentGrid();
-                ClearStudentFields(false);
+
+                // Khởi tạo trạng thái form trống
+                ClearStudentFields(true);
+                existingStudent = false;
+
+                // Thiết lập cho các button có giá trị enable phù hợp (Nhập: true, Sửa/Xóa: false)
                 UpdateActionButtons();
+
+                // Bỏ chọn dòng mặc định trên grid để form sẵn sàng nhập mới
+                dataGridView1.ClearSelection();
+
+                // Con trỏ thiết lập mặc định ở txtMaSV
                 BeginInvoke(new Action(() => textBox1.Focus()));
+
+                isLoaded = true;
             }
             catch (Exception exception)
             {
-                MessageBox.Show("Không thể tải dữ liệu sinh viên: " + exception.Message,
+                MessageBox.Show("Không thể tải dữ liệu: " + exception.Message,
                     "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -150,17 +190,26 @@ namespace QuanLySinhVien
         private void BindClasses()
         {
             var classes = repository.GetClasses().ToList();
+
+            // ComboBox chọn lớp cho sinh viên
             comboBox1.DataSource = null;
             comboBox1.DisplayMember = "TenLop";
             comboBox1.ValueMember = "MaLop";
             comboBox1.DataSource = classes;
             comboBox1.SelectedIndex = -1;
 
+            // ComboBox lọc lớp trong khu vực tìm kiếm (có tùy chọn "Tất cả lớp")
+            var filterClasses = new List<LopHoc>
+            {
+                new LopHoc { MaLop = "", TenLop = "Tất cả lớp" }
+            };
+            filterClasses.AddRange(classes);
+
             comboBox3.DataSource = null;
             comboBox3.DisplayMember = "TenLop";
             comboBox3.ValueMember = "MaLop";
-            comboBox3.DataSource = classes.ToList();
-            comboBox3.SelectedIndex = -1;
+            comboBox3.DataSource = filterClasses;
+            comboBox3.SelectedIndex = 0;
         }
 
         private void RefreshStudentGrid()
@@ -183,17 +232,23 @@ namespace QuanLySinhVien
             if (keyword.Length > 0)
             {
                 students = students.Where(student =>
-                    ContainsText(student.MaSV, keyword) || ContainsText(student.HoTen, keyword));
+                    ContainsText(student.MaSV, keyword) ||
+                    ContainsText(student.HoTen, keyword) ||
+                    ContainsText(student.Email, keyword) ||
+                    ContainsText(student.DienThoai, keyword));
             }
 
             if (comboBox3.SelectedValue != null)
             {
                 var selectedClass = Convert.ToString(comboBox3.SelectedValue);
-                students = students.Where(student => string.Equals(student.MaLop, selectedClass, StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(selectedClass))
+                {
+                    students = students.Where(student => string.Equals(student.MaLop, selectedClass, StringComparison.OrdinalIgnoreCase));
+                }
             }
 
             decimal minimumScore;
-            if (decimal.TryParse(textBox6.Text.Trim(), out minimumScore))
+            if (decimal.TryParse(textBox6.Text.Trim(), out minimumScore) && minimumScore > 0)
             {
                 students = students.Where(student => student.Diem >= minimumScore);
             }
@@ -202,14 +257,15 @@ namespace QuanLySinhVien
             {
                 student.MaSV,
                 student.HoTen,
-                student.NgaySinh,
+                NgaySinh = student.NgaySinh.ToString("dd/MM/yyyy"),
                 student.GioiTinh,
                 student.Email,
                 student.DienThoai,
-                student.TrangThai,
-                student.Diem,
-                LopHoc = student.LopHoc == null ? string.Empty : student.LopHoc.TenLop
+                Diem = student.Diem.ToString("0.0"),
+                Lop = student.LopHoc == null ? string.Empty : student.LopHoc.TenLop,
+                student.TrangThai
             }).ToList();
+
             var wasBinding = bindingStudents;
             bindingStudents = true;
             try
@@ -220,15 +276,19 @@ namespace QuanLySinhVien
             {
                 bindingStudents = wasBinding;
             }
-            SetGridHeader("MaSV", "Mã sinh viên");
+
+            // Định dạng tiêu đề cột theo hình giao diện
+            SetGridHeader("MaSV", "Mã SV");
             SetGridHeader("HoTen", "Họ và tên");
             SetGridHeader("NgaySinh", "Ngày sinh");
             SetGridHeader("GioiTinh", "Giới tính");
             SetGridHeader("Email", "Email");
             SetGridHeader("DienThoai", "Điện thoại");
-            SetGridHeader("TrangThai", "Trạng thái");
             SetGridHeader("Diem", "Điểm");
-            SetGridHeader("LopHoc", "Lớp học");
+            SetGridHeader("Lop", "Lớp");
+            SetGridHeader("TrangThai", "Trạng thái");
+
+            label3.Text = string.Format("Tổng số: {0} sinh viên", rows.Count);
             textBox3.Text = rows.Count.ToString();
         }
 
@@ -237,6 +297,9 @@ namespace QuanLySinhVien
             return value != null && value.IndexOf(keyword, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }
 
+        // ==========================================
+        // SỰ KIỆN KHI NGƯỜI DÙNG NHẬP MÃ SINH VIÊN
+        // ==========================================
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (updatingStudentId)
@@ -256,14 +319,21 @@ namespace QuanLySinhVien
             try
             {
                 var student = repository.FindStudent(maSV);
-                existingStudent = student != null;
-                if (student == null)
+                if (student != null)
                 {
-                    ClearStudentFields(false);
+                    // Nếu mã sinh viên tồn tại:
+                    // - Lấy thông tin của sinh viên hiển thị tương ứng lên các điều khiển còn lại
+                    // - Disable chức năng nhập, enable chức năng sửa, xóa
+                    existingStudent = true;
+                    DisplayStudent(student);
                 }
                 else
                 {
-                    DisplayStudent(student);
+                    // Chưa tồn tại:
+                    // - Xóa giá trị các điều khiển textbox
+                    // - Enable chức năng nhập, disable chức năng sửa, xóa
+                    existingStudent = false;
+                    ClearStudentFields(false);
                 }
 
                 UpdateActionButtons();
@@ -285,10 +355,10 @@ namespace QuanLySinhVien
             textBox2.Text = student.DienThoai ?? string.Empty;
             comboBox2.Text = student.TrangThai ?? string.Empty;
             numericUpDown1.Value = Math.Min(numericUpDown1.Maximum, Math.Max(numericUpDown1.Minimum, student.Diem));
-            radioButton1.Checked = string.Equals(student.GioiTinh, radioButton1.Text, StringComparison.OrdinalIgnoreCase);
-            radioButton2.Checked = string.Equals(student.GioiTinh, radioButton2.Text, StringComparison.OrdinalIgnoreCase);
+            radioButton1.Checked = string.Equals(student.GioiTinh, "Nam", StringComparison.OrdinalIgnoreCase);
+            radioButton2.Checked = string.Equals(student.GioiTinh, "Nữ", StringComparison.OrdinalIgnoreCase);
             comboBox1.SelectedValue = student.MaLop;
-            textBox1.ReadOnly = true;
+            textBox1.ReadOnly = false;
         }
 
         private void ClearStudentFields(bool clearStudentId)
@@ -305,6 +375,7 @@ namespace QuanLySinhVien
                 DateTime.Today > dateTimePicker1.MaxDate ? dateTimePicker1.MaxDate : DateTime.Today;
             textBox4.Clear();
             textBox2.Clear();
+            comboBox2.SelectedIndex = -1;
             comboBox2.Text = string.Empty;
             numericUpDown1.Value = numericUpDown1.Minimum;
             radioButton1.Checked = false;
@@ -315,31 +386,28 @@ namespace QuanLySinhVien
 
         private void UpdateActionButtons()
         {
-            var hasId = !string.IsNullOrWhiteSpace(textBox1.Text);
-            button3.Enabled = hasId && !existingStudent;
+            // Nếu sinh viên đã tồn tại: disable chức năng nhập, enable chức năng sửa, xóa
+            // Nếu chưa tồn tại: enable chức năng nhập, disable chức năng sửa, xóa
+            button3.Enabled = !existingStudent;
             button4.Enabled = existingStudent;
             button5.Enabled = existingStudent;
+            button6.Enabled = true;
         }
 
         private SinhVien ReadStudentFromForm()
         {
             var selectedClass = comboBox1.SelectedValue;
-            if (selectedClass == null)
-            {
-                throw new InvalidOperationException("Vui lòng chọn lớp học.");
-            }
-
             return new SinhVien
             {
                 MaSV = textBox1.Text.Trim(),
                 HoTen = textBox7.Text.Trim(),
                 NgaySinh = dateTimePicker1.Value.Date,
-                GioiTinh = radioButton1.Checked ? radioButton1.Text : radioButton2.Checked ? radioButton2.Text : null,
+                GioiTinh = radioButton1.Checked ? "Nam" : radioButton2.Checked ? "Nữ" : null,
                 Email = textBox4.Text.Trim(),
                 DienThoai = textBox2.Text.Trim(),
-                TrangThai = comboBox2.Text.Trim(),
+                TrangThai = string.IsNullOrWhiteSpace(comboBox2.Text) ? "Đang học" : comboBox2.Text.Trim(),
                 Diem = numericUpDown1.Value,
-                MaLop = Convert.ToString(selectedClass)
+                MaLop = selectedClass != null ? Convert.ToString(selectedClass) : null
             };
         }
 
@@ -356,6 +424,9 @@ namespace QuanLySinhVien
             return false;
         }
 
+        // ==========================================
+        // CÁC CHỨC NĂNG TÌM KIẾM VÀ LỌC
+        // ==========================================
         private void button1_Click(object sender, EventArgs e)
         {
             try
@@ -373,7 +444,7 @@ namespace QuanLySinhVien
         {
             textBox5.Clear();
             textBox6.Clear();
-            comboBox3.SelectedIndex = -1;
+            comboBox3.SelectedIndex = 0;
             try
             {
                 ApplyStudentFilter();
@@ -385,6 +456,9 @@ namespace QuanLySinhVien
             }
         }
 
+        // ==========================================
+        // CHỨC NĂNG NHẬP / THÊM MỚI
+        // ==========================================
         private void button3_Click(object sender, EventArgs e)
         {
             try
@@ -395,12 +469,18 @@ namespace QuanLySinhVien
                     return;
                 }
 
+                if (repository.FindStudent(student.MaSV) != null)
+                {
+                    MessageBox.Show("Mã sinh viên đã tồn tại trong hệ thống.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 repository.AddStudent(student);
                 existingStudent = true;
                 DisplayStudent(student);
                 RefreshStudentGrid();
                 UpdateActionButtons();
-                MessageBox.Show("Đã thêm sinh viên.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Đã thêm sinh viên thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)
             {
@@ -409,8 +489,29 @@ namespace QuanLySinhVien
             }
         }
 
+        // ==========================================
+        // CHỨC NĂNG SỬA (CHỨC NĂNG NGUY HIỂM - CÓ XÁC THỰC)
+        // ==========================================
         private void button4_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("Vui lòng chọn hoặc nhập mã sinh viên cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Xác thực trước khi thực hiện chức năng nguy hiểm (ghi đè dữ liệu)
+            var confirmResult = MessageBox.Show(
+                string.Format("Bạn có chắc chắn muốn cập nhật thông tin sinh viên [{0}] không?", textBox1.Text.Trim()),
+                "Xác nhận sửa thông tin",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirmResult != DialogResult.Yes)
+            {
+                return;
+            }
+
             try
             {
                 var student = ReadStudentFromForm();
@@ -424,7 +525,7 @@ namespace QuanLySinhVien
                 DisplayStudent(student);
                 RefreshStudentGrid();
                 UpdateActionButtons();
-                MessageBox.Show("Đã cập nhật thông tin sinh viên.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Đã cập nhật thông tin sinh viên thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)
             {
@@ -433,10 +534,25 @@ namespace QuanLySinhVien
             }
         }
 
+        // ==========================================
+        // CHỨC NĂNG XÓA (CHỨC NĂNG NGUY HIỂM - CÓ XÁC THỰC)
+        // ==========================================
         private void button5_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Bạn có chắc muốn xóa sinh viên này?", "Xác nhận xóa",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("Vui lòng chọn hoặc nhập mã sinh viên cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Xác thực trước khi thực hiện chức năng nguy hiểm (xóa vĩnh viễn)
+            var confirmResult = MessageBox.Show(
+                string.Format("Bạn có chắc chắn muốn xóa sinh viên [{0}] không?\nHành động này không thể hoàn tác!", textBox1.Text.Trim()),
+                "Xác nhận xóa sinh viên",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirmResult != DialogResult.Yes)
             {
                 return;
             }
@@ -448,6 +564,9 @@ namespace QuanLySinhVien
                 ClearStudentFields(true);
                 RefreshStudentGrid();
                 UpdateActionButtons();
+                dataGridView1.ClearSelection();
+                textBox1.Focus();
+                MessageBox.Show("Đã xóa sinh viên thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)
             {
@@ -456,15 +575,40 @@ namespace QuanLySinhVien
             }
         }
 
+        // ==========================================
+        // CHỨC NĂNG LÀM MỚI
+        // ==========================================
         private void button6_Click(object sender, EventArgs e)
         {
+            // Xóa trống các thuộc tính trên form
             existingStudent = false;
             ClearStudentFields(true);
+
+            // Enable button Nhập, Disable button sửa xóa
             UpdateActionButtons();
+
+            // Chuyển tiêu điểm về điều khiển txtMaSV
+            dataGridView1.ClearSelection();
             textBox1.Focus();
         }
 
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                SyncSelectedStudentFromGrid();
+            }
+        }
+
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (isLoaded && !bindingStudents)
+            {
+                SyncSelectedStudentFromGrid();
+            }
+        }
+
+        private void SyncSelectedStudentFromGrid()
         {
             if (bindingStudents || dataGridView1.CurrentRow == null || !dataGridView1.Columns.Contains("MaSV"))
             {
@@ -477,10 +621,17 @@ namespace QuanLySinhVien
                 return;
             }
 
+            var maSV = Convert.ToString(value).Trim();
+            if (string.IsNullOrEmpty(maSV))
+            {
+                return;
+            }
+
             updatingStudentId = true;
-            textBox1.Text = Convert.ToString(value);
+            textBox1.Text = maSV;
             updatingStudentId = false;
-            var student = repository.FindStudent(textBox1.Text);
+
+            var student = repository.FindStudent(maSV);
             existingStudent = student != null;
             if (student != null)
             {
@@ -503,6 +654,18 @@ namespace QuanLySinhVien
         }
 
         private void groupBox3_Enter(object sender, EventArgs e)
+        {
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void label1_Click_1(object sender, EventArgs e)
+        {
+        }
+
+        private void label3_Click(object sender, EventArgs e)
         {
         }
     }
