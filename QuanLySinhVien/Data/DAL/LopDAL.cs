@@ -1,48 +1,123 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using QuanLySinhVien.Data.Entity;
 
 namespace QuanLySinhVien.Data.DAL
 {
     public class LopDAL
     {
-        private static List<LopHoc> lopHocs = new List<LopHoc>
-        {
-            new LopHoc { MaLop = "CSE0001", TenLop = "Khoa h\u1ecdc m\u00e1y t\u00ednh 01" },
-            new LopHoc { MaLop = "CSE0002", TenLop = "Khoa h\u1ecdc m\u00e1y t\u00ednh 02" },
-            new LopHoc { MaLop = "CSE0003", TenLop = "Khoa h\u1ecdc m\u00e1y t\u00ednh 03" },
-            new LopHoc { MaLop = "KTPM01",  TenLop = "K\u1ef9 thu\u1eadt ph\u1ea7n m\u1ec1m 01" }
-        };
+        protected readonly DataHelper dataHelper;
 
-        public List<LopHoc> GetAllLopHoc()
+        public LopDAL()
         {
-            return lopHocs.ToList();
+            dataHelper = new DataHelper();
         }
 
-        public LopHoc GetLopById(string maLop)
+        public LopDAL(DataHelper helper)
+        {
+            dataHelper = helper ?? new DataHelper();
+        }
+
+        public virtual List<LopHoc> GetAllLopHoc()
+        {
+            try
+            {
+                DataTable dt = dataHelper.GetDataTable("SELECT MaLop, TenLop FROM LopHoc ORDER BY MaLop");
+                List<LopHoc> list = new List<LopHoc>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    list.Add(MapLopHoc(row));
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi DataAccess Layer khi lấy danh sách lớp học: " + ex.Message, ex);
+            }
+        }
+
+        public virtual LopHoc GetLopById(string maLop)
         {
             if (string.IsNullOrWhiteSpace(maLop)) return null;
-            return lopHocs.FirstOrDefault(l => string.Equals(l.MaLop, maLop.Trim(), StringComparison.OrdinalIgnoreCase));
+            try
+            {
+                var pMaLop = dataHelper.CreateParameter("@MaLop", maLop.Trim());
+                DataTable dt = dataHelper.GetDataTable("SELECT MaLop, TenLop FROM LopHoc WHERE MaLop = @MaLop", pMaLop);
+                if (dt.Rows.Count == 0) return null;
+                return MapLopHoc(dt.Rows[0]);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi DataAccess Layer khi tìm lớp học theo mã: " + ex.Message, ex);
+            }
         }
 
-        public void AddLopHoc(LopHoc lh)
+        public virtual void AddLopHoc(LopHoc lh)
         {
-            if (lh == null) throw new ArgumentNullException("lh");
-            lopHocs.Add(lh);
+            if (lh == null) throw new ArgumentNullException("lh", "Thông tin lớp học không được để trống.");
+            try
+            {
+                var pMaLop = dataHelper.CreateParameter("@MaLop", lh.MaLop != null ? lh.MaLop.Trim() : (object)DBNull.Value);
+                var pTenLop = dataHelper.CreateParameter("@TenLop", lh.TenLop != null ? lh.TenLop.Trim() : (object)DBNull.Value);
+                dataHelper.ExecuteNonQuery("INSERT INTO LopHoc (MaLop, TenLop) VALUES (@MaLop, @TenLop)", pMaLop, pTenLop);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi DataAccess Layer khi thêm lớp học: " + ex.Message, ex);
+            }
         }
 
-        public void UpdateLopHoc(LopHoc lh)
+        public virtual void UpdateLopHoc(LopHoc lh)
         {
-            if (lh == null) throw new ArgumentNullException("lh");
-            var index = lopHocs.FindIndex(l => string.Equals(l.MaLop, lh.MaLop, StringComparison.OrdinalIgnoreCase));
-            if (index >= 0) lopHocs[index] = lh;
+            if (lh == null) throw new ArgumentNullException("lh", "Thông tin lớp học không được để trống.");
+            try
+            {
+                var pMaLop = dataHelper.CreateParameter("@MaLop", lh.MaLop != null ? lh.MaLop.Trim() : (object)DBNull.Value);
+                var pTenLop = dataHelper.CreateParameter("@TenLop", lh.TenLop != null ? lh.TenLop.Trim() : (object)DBNull.Value);
+                dataHelper.ExecuteNonQuery("UPDATE LopHoc SET TenLop = @TenLop WHERE MaLop = @MaLop", pTenLop, pMaLop);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi DataAccess Layer khi cập nhật lớp học: " + ex.Message, ex);
+            }
         }
 
-        public void DeleteLopHoc(string maLop)
+        public virtual void DeleteLopHoc(string maLop)
         {
-            var lop = GetLopById(maLop);
-            if (lop != null) lopHocs.Remove(lop);
+            if (string.IsNullOrWhiteSpace(maLop))
+                throw new ArgumentException("Mã lớp không được để trống.", "maLop");
+            try
+            {
+                var pMaLop = dataHelper.CreateParameter("@MaLop", maLop.Trim());
+                dataHelper.ExecuteNonQuery("DELETE FROM LopHoc WHERE MaLop = @MaLop", pMaLop);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi DataAccess Layer khi xóa lớp học: " + ex.Message, ex);
+            }
         }
+
+        // Aliases for DAO naming
+        public virtual List<LopHoc> GetAll() { return GetAllLopHoc(); }
+        public virtual LopHoc GetById(string maLop) { return GetLopById(maLop); }
+        public virtual void Insert(LopHoc lh) { AddLopHoc(lh); }
+        public virtual void Update(LopHoc lh) { UpdateLopHoc(lh); }
+        public virtual void Delete(string maLop) { DeleteLopHoc(maLop); }
+
+        private static LopHoc MapLopHoc(DataRow row)
+        {
+            return new LopHoc
+            {
+                MaLop = row["MaLop"] != null ? row["MaLop"].ToString() : "",
+                TenLop = row["TenLop"] != null ? row["TenLop"].ToString() : ""
+            };
+        }
+    }
+
+    public class LopHocDAO : LopDAL
+    {
+        public LopHocDAO() : base() { }
+        public LopHocDAO(DataHelper helper) : base(helper) { }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
@@ -215,7 +215,10 @@ namespace QuanLySinhVien
                 else { existingStudent = false; ClearStudentFields(false); }
                 UpdateActionButtons();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                errorProvider.SetError(textBox1, "Lỗi tìm kiếm: " + ex.Message);
+            }
         }
 
         private void DisplayStudent(SinhVien sv)
@@ -318,16 +321,19 @@ namespace QuanLySinhVien
                 RefreshStudentGrid();
                 UpdateActionButtons();
                 ClearErrors();
-                MessageBox.Show("Th\u00eam sinh vi\u00ean th\u00e0nh c\u00f4ng!", "Th\u00f4ng b\u00e1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Thêm sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "L\u1ed7i", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi thêm sinh viên", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ============ SUA ============
         private void button4_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text)) return;
-            var confirm = MessageBox.Show("X\u00e1c nh\u1eadn c\u1eadp nh\u1eadt?", "X\u00e1c nh\u1eadn", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = MessageBox.Show("Xác nhận cập nhật?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes) return;
             try
             {
@@ -337,16 +343,19 @@ namespace QuanLySinhVien
                 RefreshStudentGrid();
                 UpdateActionButtons();
                 ClearErrors();
-                MessageBox.Show("C\u1eadp nh\u1eadt th\u00e0nh c\u00f4ng!", "Th\u00f4ng b\u00e1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "L\u1ed7i", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ============ XOA ============
         private void button5_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text)) return;
-            var confirm = MessageBox.Show("X\u00e1c nh\u1eadn x\u00f3a?", "X\u00e1c nh\u1eadn", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            var confirm = MessageBox.Show("Xác nhận xóa?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
             try
             {
@@ -356,19 +365,29 @@ namespace QuanLySinhVien
                 RefreshStudentGrid();
                 UpdateActionButtons();
                 textBox1.Focus();
-                MessageBox.Show("X\u00f3a th\u00e0nh c\u00f4ng!", "Th\u00f4ng b\u00e1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "L\u1ed7i", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi xóa sinh viên", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ============ LAM MOI ============
         private void button6_Click(object sender, EventArgs e)
         {
-            existingStudent = false;
-            ClearStudentFields(true);
-            UpdateActionButtons();
-            dataGridView1.ClearSelection();
-            textBox1.Focus();
+            try
+            {
+                existingStudent = false;
+                ClearStudentFields(true);
+                UpdateActionButtons();
+                dataGridView1.ClearSelection();
+                textBox1.Focus();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi làm mới", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ============ TIM KIEM ============
@@ -382,15 +401,26 @@ namespace QuanLySinhVien
                 decimal.TryParse(textBox6.Text.Trim(), out minDiem);
                 DisplayStudentsOnGrid(sinhVienBUL.FilterStudents(kw, maLop, minDiem));
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "L\u1ed7i", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi tìm kiếm", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ============ HIEN THI TAT CA ============
         private void button2_Click(object sender, EventArgs e)
         {
-            textBox5.Clear(); textBox6.Clear();
-            if (comboBox3.Items.Count > 0) comboBox3.SelectedIndex = 0;
-            RefreshStudentGrid();
+            try
+            {
+                textBox5.Clear();
+                textBox6.Clear();
+                if (comboBox3.Items.Count > 0) comboBox3.SelectedIndex = 0;
+                RefreshStudentGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi hiển thị", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -410,13 +440,20 @@ namespace QuanLySinhVien
             if (val == null || val == DBNull.Value) return;
             var maSV = Convert.ToString(val).Trim();
             if (string.IsNullOrEmpty(maSV)) return;
-            updatingStudentId = true;
-            textBox1.Text = maSV;
-            updatingStudentId = false;
-            var sv = sinhVienBUL.GetSinhVienById(maSV);
-            existingStudent = (sv != null);
-            if (sv != null) DisplayStudent(sv);
-            UpdateActionButtons();
+            try
+            {
+                updatingStudentId = true;
+                textBox1.Text = maSV;
+                updatingStudentId = false;
+                var sv = sinhVienBUL.GetSinhVienById(maSV);
+                existingStudent = (sv != null);
+                if (sv != null) DisplayStudent(sv);
+                UpdateActionButtons();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi hiển thị chi tiết sinh viên: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void groupBox1_Enter(object sender, EventArgs e) {}
