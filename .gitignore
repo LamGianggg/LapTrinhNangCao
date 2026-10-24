@@ -4,3 +4,7 @@ bin/
 **/bin/
 obj/
 **/obj/
+packages/
+**/packages/
+*.nupkg
+nuget.exe
