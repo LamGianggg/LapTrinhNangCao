@@ -1,0 +1,282 @@
+=== FILE: Bai_2_On_tap_OOP_Property_Data_Annotations.pptx ===
+BÀI 2 ÔN TẬP OOP, PROPERTY VÀ DATA ANNOTATIONS Thiết kế đối tượng có trạng thái hợp lệ và kiểm tra dữ liệu theo metadata Mô hình Class • Object • Encapsulation • Inheritance • Polymorphism Ràng buộc Property validation • Attributes • Validator • Business rules Giảng viên: Chu Thị Minh Huệ Học phần: Lập trình nâng cao với C#
+---
+BÀI 2 Mục tiêu bài học 02 SAU BÀI HỌC, SINH VIÊN CÓ THỂ SẢN PHẨM CUỐI BUỔI • Giải thích các nguyên lý OOP trong C# • Thiết kế property có phạm vi truy cập phù hợp • Phân biệt validation trong setter và Data Annotations • Chủ động kiểm tra object bằng Validator Một lớp Student hoàn chỉnh: • Trạng thái được đóng gói • Dữ liệu đầu vào có ràng buộc • Thông báo lỗi rõ ràng • Có kiểm tra quy tắc liên thuộc tính • Sẵn sàng dùng ở WinForms và EF Core Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Mạch nội dung 03 PHẦN 1: MÔ HÌNH ĐỐI TƯỢNG PHẦN 2: RÀNG BUỘC DỮ LIỆU 01  Class và object 02  Encapsulation và property 03  Constructor và trạng thái hợp lệ 04  Inheritance, polymorphism, abstraction 05  Validation trong property 06  Attribute và metadata 07  Data Annotations và Validator 08  Quy tắc nghiệp vụ và thực hành Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Ví dụ xuyên suốt: quản lý sinh viên 04 ĐỐI TƯỢNG TRUNG TÂM CÁC CHỨC NĂNG PHÁT TRIỂN DẦN Student • StudentId • FullName • DateOfBirth • Email • Major • Score • Status • Tạo và cập nhật sinh viên • Kiểm tra dữ liệu nhập • Tính tuổi và xếp loại • Lưu danh sách sinh viên • Tìm kiếm và lọc sinh viên • Đăng ký học phần • Mở rộng sang WinForms và EF Core Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Class và object 05 CLASS OBJECT Bản thiết kế mô tả: • Dữ liệu qua field hoặc property • Hành vi qua method • Quy tắc duy trì trạng thái hợp lệ Một class có thể tạo nhiều object. Một thể hiện cụ thể của class: • Có giá trị riêng • Được tạo bằng new • Có vòng đời trong bộ nhớ • Tương tác qua public members Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Từ mô hình đến class 06 Class Student gom dữ liệu và hành vi thuộc cùng một đối tượng. public class Student {     public string Id { get; set; } = "";     public string FullName { get; set; } = "";     public double Score { get; set; }     public bool IsPassed()         => Score >= 5.0; } var student = new Student {     Id = "SV000001",     FullName = "Nguyễn An",     Score = 8.2 }; GHI NHỚ • Property mô tả trạng thái • Method mô tả hành vi • new tạo object • Object initializer gán dữ liệu khi khởi tạo Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Bốn nguyên lý OOP 07 ĐÓNG GÓI VÀ TRỪU TƯỢNG KẾ THỪA VÀ ĐA HÌNH Encapsulation Che giấu chi tiết, kiểm soát cách dữ liệu thay đổi. Abstraction Chỉ công khai những thao tác cần thiết qua interface hoặc abstract class. Inheritance Tạo kiểu chuyên biệt từ kiểu tổng quát. Polymorphism Cùng lời gọi method nhưng hành vi phụ thuộc kiểu object thực tế. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Encapsulation bảo vệ trạng thái 08 Student tự kiểm soát việc thay đổi điểm thay vì công khai field. public class Student {     private double score;     public double Score => score;     public void UpdateScore(double newScore)     {         if (newScore < 0 || newScore > 10)             throw new ArgumentOutOfRangeException(                 nameof(newScore),                 "Điểm phải từ 0 đến 10");         score = newScore;     } } GHI NHỚ • Field score đặt private • Bên ngoài chỉ đọc Score • Thay đổi qua UpdateScore • Student luôn bảo vệ miền điểm Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Field và property 09 FIELD PROPERTY private string fullName = ""; private double score; // Dữ liệu lưu trữ nội bộ // Thường đặt private public string FullName {     get => fullName;     set => fullName = value; } // Giao diện truy cập có kiểm soát Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Auto-property và phạm vi truy cập 10 CÁC DẠNG THƯỜNG DÙNG Ý NGHĨA THIẾT KẾ public string Name { get; set; } = ""; public string Id { get; init; } = ""; public decimal Price { get; private set; } public DateTime CreatedAt { get; }     = DateTime.Now; get; set;  Cho phép đọc và ghi get; init;  Chỉ gán khi khởi tạo private set  Chỉ class được phép ghi get;  Chỉ đọc từ bên ngoài Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Validation trong property setter 11 Setter có thể từ chối giá trị làm object rơi vào trạng thái không hợp lệ. private double score; public double Score {     get => score;     set     {         if (value < 0 || value > 10)             throw new ArgumentOutOfRangeException(                 nameof(value),                 "Điểm phải từ 0 đến 10");         score = value;     } } GHI NHỚ • Kiểm tra diễn ra ngay khi gán • Không tồn tại object có điểm sai • Phù hợp invariant quan trọng • Cần xử lý exception ở nơi gọi Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Constructor thiết lập trạng thái ban đầu 12 Constructor nhận dữ liệu bắt buộc và bảo đảm Student hợp lệ ngay khi được tạo. public class Student {     public string StudentId { get; }     public string FullName { get; private set; }     public string Major { get; private set; }     public Student(         string studentId, string fullName, string major)     {         if (string.IsNullOrWhiteSpace(studentId))             throw new ArgumentException("Thiếu mã SV");         if (string.IsNullOrWhiteSpace(fullName))             throw new ArgumentException("Thiếu họ tên");         StudentId = studentId;         FullName = fullName; Major = major;     } } GHI NHỚ • Mã và họ tên là bắt buộc • StudentId chỉ đọc • Object hợp lệ ngay khi tạo • Constructor không thực hiện nhập xuất Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Inheritance và override 13 Student và Lecturer dùng chung dữ liệu cơ bản từ Person. public abstract class Person {     public string Id { get; set; } = "";     public string FullName { get; set; } = "";     public abstract string GetRole(); } public class Student : Person {     public string Major { get; set; } = "";     public override string GetRole()         => $"Sinh viên ngành {Major}"; } GHI NHỚ • Student is-a Person • Person chứa dữ liệu dùng chung • GetRole là hành vi đa hình • Không lạm dụng kế thừa Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Polymorphism qua kiểu cơ sở 14 Danh sách Person có thể chứa Student và Lecturer rồi gọi cùng một method. List<Person> people = new() {     new Student     {         Id = "SV000001", FullName = "An",         Major = "Software Engineering"     },     new Lecturer     {         Id = "GV001", FullName = "Cô Huệ",         Department = "Information Technology"     } }; foreach (Person person in people)     Console.WriteLine(person.GetRole()); GHI NHỚ • Biến có kiểu Person • Object thực tế có thể khác nhau • Runtime chọn method override • Không cần if theo từng loại người Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Abstract class và interface 15 ABSTRACT CLASS INTERFACE • Có thể chứa state và constructor • Có abstract và concrete members • Một class chỉ kế thừa một class • Dùng cho các kiểu cùng họ • Mô tả một năng lực hoặc hợp đồng • Một class cài đặt nhiều interface • Hỗ trợ thay thế implementation • Thuận lợi cho kiểm thử và DI Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Composition và inheritance 16 COMPOSITION INHERITANCE class StudentService {     private readonly IStudentRepository repo;     public StudentService(IStudentRepository repo)     {         this.repo = repo;     } } Ưu tiên composition khi đối tượng chỉ cần sử dụng một năng lực. Chỉ dùng inheritance khi quan hệ is-a ổn định và kiểu con thực sự thay thế được kiểu cha. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Vì sao cần validation? 17 DỮ LIỆU KHÔNG HỢP LỆ HẬU QUẢ • Mã sinh viên để trống • Điểm ngoài khoảng 0–10 • Email sai định dạng • Ngày sinh ở tương lai • Mã lớp không tồn tại • Object có trạng thái sai • Lỗi lan tới tầng nghiệp vụ • Ghi dữ liệu bẩn vào database • Giao diện khó giải thích lỗi • Báo cáo và truy vấn thiếu tin cậy Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Ba tầng kiểm tra dữ liệu 18 RÀNG BUỘC CẤU TRÚC QUY TẮC NGHIỆP VỤ Property hoặc Data Annotations: • Bắt buộc nhập • Độ dài • Khoảng giá trị • Định dạng email, điện thoại, mã Business layer hoặc domain model: • Không đăng ký quá 24 tín chỉ • Chỉ mượn tối đa 3 cuốn • Không mượn khi đang bị khóa • Mã sinh viên phải duy nhất Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Attribute và metadata 19 ATTRIBUTE LÀ GÌ? CÚ PHÁP Attribute gắn metadata vào class, property, method hoặc parameter. Framework có thể đọc metadata bằng reflection và thực hiện validation, mapping hoặc hiển thị. [Required] [StringLength(100)] [Range(0, 10)] [EmailAddress] public string Email { get; set; } = ""; Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Chuẩn bị sử dụng Data Annotations 20 Các validation attributes nằm trong System.ComponentModel.DataAnnotations. using System.ComponentModel.DataAnnotations; public class Student {     [Required]     public string Id { get; set; } = "";     [Range(0, 10)]     public double Score { get; set; } } GHI NHỚ • Có sẵn trong .NET hiện đại • Attribute đặt ngay trên member • Có thể cấu hình ErrorMessage • Cần framework hoặc Validator thực thi Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Các annotation thường dùng 21 KIỂM TRA GIÁ TRỊ HIỂN THỊ VÀ MAPPING [Required] [StringLength]  [MinLength]  [MaxLength] [Range] [EmailAddress]  [Phone]  [Url] [RegularExpression] [Compare]  [CustomValidation] [Display]  [DisplayFormat] [DataType] [Key] [Column]  [Table] [NotMapped] [ForeignKey] [ConcurrencyCheck]  [Timestamp] Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Mô hình Student với Data Annotations 22 Mỗi ràng buộc nằm gần property mà nó mô tả. public class Student {     [Required(ErrorMessage = "Phải nhập mã SV")]     [StringLength(8, MinimumLength = 8)]     public string Id { get; set; } = "";     [Required(ErrorMessage = "Phải nhập họ tên")]     [StringLength(100, MinimumLength = 3)]     public string FullName { get; set; } = "";     [Range(0, 10,         ErrorMessage = "Điểm phải từ 0 đến 10")]     public double Score { get; set; } } GHI NHỚ • Required kiểm tra giá trị thiếu • StringLength kiểm tra độ dài • Range kiểm tra miền số • ErrorMessage hướng dẫn người dùng Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Ràng buộc định dạng bằng annotation 23 RegularExpressionAttribute áp dụng một Regex cho giá trị property. public class Student {     [RegularExpression(         @"^SV\d{6}$",         ErrorMessage =             "Mã SV gồm SV và 6 chữ số")]     public string Id { get; set; } = "";     [EmailAddress(         ErrorMessage = "Email không hợp lệ")]     public string Email { get; set; } = ""; } GHI NHỚ • ^ và $ khóa toàn bộ chuỗi • \d{6} yêu cầu sáu chữ số • Dạy Regex chi tiết ở Bài 3 • EmailAddress phù hợp kiểm tra thông thường Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Chủ động kiểm tra object bằng Validator 24 Trong Console hoặc WinForms, chương trình có thể gọi Validator.TryValidateObject. var context = new ValidationContext(student); var errors = new List<ValidationResult>(); bool isValid = Validator.TryValidateObject(     student,     context,     errors,     validateAllProperties: true); if (!isValid) {     foreach (ValidationResult error in errors)         Console.WriteLine(error.ErrorMessage); } GHI NHỚ • Kết quả trả về bool • errors chứa mọi lỗi • true kiểm tra toàn bộ property • Annotation không tự chạy trong mọi loại ứng dụng Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Gom lỗi theo property 25 MemberNames giúp giao diện đặt thông báo cạnh đúng ô nhập liệu. Dictionary<string, List<string>> errorMap =     errors         .SelectMany(e => e.MemberNames             .DefaultIfEmpty("Object")             .Select(member => new             {                 Member = member,                 Message = e.ErrorMessage ?? "Lỗi"             }))         .GroupBy(x => x.Member)         .ToDictionary(             g => g.Key,             g => g.Select(x => x.Message).ToList()); GHI NHỚ • MemberNames chỉ ra property lỗi • Có thể liên kết với ErrorProvider • LINQ sẽ học chi tiết ở Bài 3 • Không hiển thị exception kỹ thuật cho người dùng Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Quy tắc liên thuộc tính 26 IValidatableObject phù hợp khi một quy tắc cần đọc nhiều property. public class Enrollment : IValidatableObject {     public DateTime StartDate { get; set; }     public DateTime EndDate { get; set; }     public IEnumerable<ValidationResult> Validate(         ValidationContext context)     {         if (EndDate < StartDate)             yield return new ValidationResult(                 "Ngày kết thúc phải sau ngày bắt đầu",                 new[] { nameof(EndDate) });     } } GHI NHỚ • Kiểm tra nhiều property cùng lúc • Trả về một hoặc nhiều lỗi • Gắn lỗi với member liên quan • Không thay thế các quy tắc nghiệp vụ phức tạp Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Tạo validation attribute tùy chỉnh 27 Kế thừa ValidationAttribute khi một quy tắc được tái sử dụng ở nhiều model. public class NotFutureDateAttribute     : ValidationAttribute {     public override bool IsValid(object? value)     {         if (value is null) return true;         return value is DateTime date             && date.Date <= DateTime.Today;     } } [NotFutureDate(     ErrorMessage = "Ngày sinh không ở tương lai")] public DateTime DateOfBirth { get; set; } GHI NHỚ • Kế thừa ValidationAttribute • null có thể giao cho Required • Tái sử dụng cho nhiều model • Viết unit test cho attribute Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Data Annotations và business rules 28 PHÙ HỢP VỚI ANNOTATION NÊN ĐẶT Ở BUSINESS LAYER • Required, length, range • Format email, phone, mã • So sánh hai trường đơn giản • Metadata hiển thị • Mapping cơ bản cho EF Core • Kiểm tra trùng trong database • Quy tắc phụ thuộc người dùng hiện tại • Tính hạn mức hoặc chính sách • Kiểm tra qua nhiều aggregate • Quy tắc thường xuyên thay đổi Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Property validation và Data Annotations 29 PROPERTY HOẶC CONSTRUCTOR DATA ANNOTATIONS Bảo vệ invariant của chính object. Kiểm tra ngay khi gán. Có thể ném exception. Phù hợp quy tắc luôn đúng trong mọi ngữ cảnh. Mô tả ràng buộc bằng metadata. Cho phép gom nhiều lỗi. Framework có thể tự đọc. Phù hợp dữ liệu nhập và model binding. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+THỰC HÀNH Thực hành 1: hoàn thiện lớp Student 30 NHIỆM VỤ Xây dựng lớp Student gồm Id, FullName, DateOfBirth, Email, Major và Score. Dùng Data Annotations để kiểm tra bắt buộc nhập, độ dài, khoảng điểm, email, mã sinh viên và ngày sinh. Tiêu chí hoàn thành Tạo ít nhất 5 object, trong đó có 3 object sai. Gọi Validator và in đầy đủ property cùng thông báo lỗi. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+THỰC HÀNH Thực hành 2: đăng ký học phần 31 NHIỆM VỤ Xây dựng lớp Course và Enrollment. Một sinh viên đăng ký một học phần ở một học kỳ. Kiểm tra mã học phần, số tín chỉ, ngày đăng ký và trạng thái đăng ký. Tiêu chí hoàn thành Phân biệt rõ quy tắc nào nằm trong property, quy tắc nào dùng annotation và quy tắc nào phải đặt ở StudentService hoặc EnrollmentService. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Tự kiểm tra nhanh 32 CÂU HỎI ĐÁP ÁN NGẮN 1. Property khác field ở điểm nào? 2. Khi nào nên dùng private set? 3. Gắn [Required] có tự kiểm tra trong Console không? 4. Annotation có kiểm tra mã trùng trong database không? 5. Khi nào dùng IValidatableObject? 1. Property kiểm soát truy cập. 2. Khi bên ngoài chỉ được đọc. 3. Không, phải gọi Validator. 4. Không nên. Đó là business/data rule. 5. Khi quy tắc liên quan nhiều property. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+---
+BÀI 2 Kết luận bài 2 33 KIẾN THỨC TRỌNG TÂM CHUẨN BỊ CHO BÀI 3 • OOP tổ chức trạng thái và hành vi • Property bảo vệ dữ liệu của object • Constructor thiết lập trạng thái ban đầu • Data Annotations mô tả ràng buộc • Validator thực thi và thu thập lỗi • Business rules cần tầng xử lý riêng Hoàn thiện lớp Student và bộ dữ liệu mẫu. Đọc trước: • Delegate và Func<T, TResult> • Lambda expression • LINQ to Objects • Regular Expression Chu Thị Minh Huệ  •  Lập trình nâng cao với C# OOP • Property • Data Annotations
+
+=== FILE: Slide 12 - Entity framework Core.pptx ===
+LẬP TRÌNH WEB VỚI MÔ HÌNH MVC 11/21/2025   1 BÀI 12 Entity framework Core
+---
+Entity Framework Core is the new version of Entity Framework after EF 6.x. It is open-source, lightweight, extensible and a cross-platform version of Entity Framework data access technology. Entity Framework is an Object/Relational Mapping (O/RM) framework. It is an enhancement to ADO.NET that gives developers an automated mechanism for accessing & storing the data in the database. EF Core is intended to be used with .NET Core applications. However, it can also be used with standard .NET 4.5+ framework based applications. 1. What is Entity framework Core 11/21/2025   2
+---
+1. What is Entity framework Core 11/21/2025   3
+---
+1. What is Entity framework Core 11/21/2025   4 EF Core supports two development approaches 1)  Code-First  2)  Database-First . EF Core mainly targets the code-first approach and provides little support for the database-first approach because the visual designer or wizard for DB model is not supported as of EF Core. 
+---
+2. Install 11/21/2025   5 You can install the EF Core NuGet package in your project using the following methods: Using NuGet Package Manager Using Package Manager Console Using  DotNet  CLI Using PowerShell Adding package reference directly in . csproj Reference
+---
+2.  FrameworkEntity  Framework  Achitecture 11/21/2025   6
+---
+2.  FrameworkEntity  Framework  Achitecture 11/21/2025   7 EDM (Entity Data Model):  EDM consists of three main parts - Conceptual model, Mapping and Storage model. Conceptual Model:  The conceptual model contains the model classes and their relationships. This will be independent from your database table design. Storage Model:  The storage model is the database design model which includes tables, views, stored procedures, and their relationships and keys. Mapping:  Mapping consists of information about how the conceptual model is mapped to the storage model. LINQ to Entities:  LINQ-to-Entities (L2E) is a query language used to write queries against the object model. It returns entities, which are defined in the conceptual model. You can use your LINQ skills here. Entity SQL:  Entity SQL is another query language (for EF 6 only) just like LINQ to Entities. However, it is a little more difficult than L2E and the developer will have to learn it separately. Object Service:  Object service is the main entry point for accessing data from the database and returning it. Object service is responsible for materialization, which is the process of converting data returned from an entity client data provider (next layer) to an entity object structure. Entity Client Data Provider:  The main responsibility of this layer is to convert LINQ-to-Entities or Entity SQL queries into a SQL query which is understood by the underlying database. It communicates with the  ADO.Net  data provider which in turn sends or retrieves data from the database. ADO.Net  Data Provider:  This layer communicates with the database using standard  ADO.Net .
+---
+3. How Entity Framework Works? 11/21/2025   8 Entity Framework API (EF6 & EF Core) includes the ability to map domain (entity) classes to the database schema, translate & execute LINQ queries to SQL, track changes occurred on entities during their lifetime, and save changes to the database.
+---
+4.  How Entity Framework Works? 11/21/2025   9 Entity Framework API (EF6 & EF Core) includes the ability to map domain (entity) classes to the database schema, translate & execute LINQ queries to SQL, track changes that occurred on entities during their lifetime, and save changes to the database.
+---
+3. How Entity Framework Works? 11/21/2025   10
+---
+The very first task of EF API is to build an Entity Data Model (EDM). EDM is an in-memory representation of the entire metadata: conceptual model, storage model, and mapping between them. 4. Entity Data Model 11/21/2025   11
+---
+EF API translates LINQ-to-Entities queries to SQL queries for relational databases using EDM and also converts results back to entity objects. 5. Query 11/21/2025   12
+---
+EF API infers INSERT, UPDATE, and DELETE commands based on the state of entities when the  SaveChanges ()  method is called. The  ChangeTrack  keeps track of the states of each entity as and when an action is performed.   6. Saving 11/21/2025   13
+---
+7. Entity Framework 11/21/2025   14 Entity Framework is an Object/Relational Mapping (O/RM) framework. It is an enhancement to ADO.NET that gives developers an automated mechanism for accessing & storing the data in the database.
+---
+Install Entity Framework Core 11/21/2025   15 Install  Microsoft.EntityFrameworkCore The database provider package dependency packages it needs
+---
+8. Entity Class 11/21/2025   16 An entity in Entity Framework is a class that maps to a database table. This class must be included as a  DbSet < TEntity >  type property in the  DbContext  class. EF API maps each entity to a table and each property of an entity to a column in the database.  
+---
+9. Context Class 11/21/2025   17 The context class is a very important class while working with EF 6 or EF Core. It represents a session with the underlying database using which you can perform CRUD (Create, Read, Update, Delete) operations.
+---
+9. Context Class 11/21/2025   18 The context class is a very important class while working with EF 6 or EF Core. It represents a session with the underlying database using which you can perform CRUD (Create, Read, Update, Delete) operations.
+---
+10. Code First Approach 11/21/2025   19 Create entity Classes Create Context Class Database Schema Creation in EF Core
+---
+10.1. Create entity Classes 11/21/2025   20  For each entity in the data model, we create a code entity class corresponding.
+---
+10.2. Create context class 11/21/2025   21   The  DbContext  class is an integral part of the Entity Framework. An instance of  DbContext  represents a session with the database which can be used to query and save instances of your entities to a database.  DbContext  is a combination of the Unit Of Work and Repository patterns. DBContext  in EF Core allows us to perform the following tasks: Manage database connection Configure model and relationships Querying database Saving data to the database Configure change tracking Caching Transaction management
+---
+10.2. Create context class 11/21/2025   22 The above context class includes two  DbSet < TEntity >  properties, for  Student  and  Grade , types which will be mapped to the  Students  and  Grades  tables in the underlying database. In the  OnConfiguring ()  method, an instance of  DbContextOptionsBuilder  is used to specify a database connection string.  
+---
+10.3.  Database Schema Creation in EF Core 11/21/2025   23 There are two ways using which you can create a database and schema: Using the  EnsureCreated ()  method Using Migration API
+---
+10.3.1  Migration API 11/21/2025   24 Migration is a way to keep the database schema in sync with the EF Core model by preserving data. As per the above figure, EF Core API builds the EF Core model from the entity classes, Data Annotations attributes applied on entity classes and Fluent API configurations in the  DbContext  class. EF Core migrations API will create or update the database schema based on the EF Core model. Whenever you change the domain classes, you need to run migration commands to keep the database schema up to date . To use EF Core Migrations API, we need to install:  Microsoft.EntityFrameworkCore.Tools  
+---
+10.3.1  Migration API 11/21/2025   25 In Visual Studio, open NuGet Package Manager Console from Tools -> NuGet Package Manager -> Package Manager Console and enter the following command:  1. add-migration  InitialSchoolDB  // Customered  Name 2. update-database
+---
+10.3.1  Migration API 11/21/2025   26 Apply Migrations for Modified Entities/Configurations:  Suppose we add a new entity or modify an existing entity or change any configuration, then we again need to execute the  add-migration  and  update-database  commands to apply changes to the database schema.  
+---
+10.3.1  Migration API 11/21/2025   27 Apply Migrations for Modified Entities/Configurations: add-migration " ModifiedStudentEntity “ update-database
+---
+10.3.1  Migration API 11/21/2025   28 Reverting Migration:  For some reason, if you want to revert the database to any of the previous states then you can do it by using the  update-database <migration-name>  command.   Ex: Update-database " InitialSchoolDB “ Removing a Migration: We can remove the last migration if it is not applied to the database. Let's remove the " ModifiedStudentEntity " file using the following command. Ex:  remove-migration
+---
+10.2. Create context class 11/21/2025   29
+---
+8. 1 Creating an Entity Data Model 11/21/2025   30 S elect the  EF Designer from database  option and click  Next .
+---
+8. 1 Creating an Entity Data Model 11/21/2025   31 School.edmx  displays all the entities for the selected tables and the relationships between them
+---
+8. 1 Creating an Entity Data Model 11/21/2025   32 EDM adds the provider and connection string settings in the  App.config  file, as shown below:
+---
+8. 1 Creating an Entity Data Model 11/21/2025   33 EDM adds the provider and connection string settings in the  App.config  file, as shown below:
+---
+8. 2 Model Brower 11/21/2025   34
+---
+8. 3  DBContext 11/21/2025   35 DbContext  is an important class in Entity Framework API. It is a bridge between your domain or entity classes and the database.
+---
+8. 3  DBContext 11/21/2025   36 DbContext  is an important class in Entity Framework API. It is a bridge between your domain or entity classes and the database.
+---
+8. 3  DBContext 11/21/2025   37 DbContext  is the primary class that is responsible for interacting with the database. It is responsible for the following activities: Querying:  Converts LINQ-to-Entities queries to SQL query and sends them to the database. Change Tracking:  Keeps track of changes that occurred on the entities after querying from the database. Persisting Data:  Performs the Insert, Update and Delete operations to the database, based on entity states. Caching:  Provides first level caching by default. It stores the entities which have been retrieved during the life time of a context class. Manage Relationship:  Manages relationships using CSDL, MSL and SSDL in Db-First or Model-First approach, and using fluent API configurations in Code-First approach. Object Materialization:  Converts raw data from the database into entity objects.
+---
+8. 3  DBContext 11/21/2025   38 DbContext  is the primary class that is responsible for interacting with the database. It is responsible for the following activities: Querying:  Converts LINQ-to-Entities queries to SQL query and sends them to the database. Change Tracking:  Keeps track of changes that occurred on the entities after querying from the database. Persisting Data:  Performs the Insert, Update and Delete operations to the database, based on entity states. Caching:  Provides first level caching by default. It stores the entities which have been retrieved during the life time of a context class. Manage Relationship:  Manages relationships using CSDL, MSL and SSDL in Db-First or Model-First approach, and using fluent API configurations in Code-First approach. Object Materialization:  Converts raw data from the database into entity objects.
+---
+8. 3  DBContext 11/21/2025   39 DbContext  Methods
+---
+8. 3  DBContext 11/21/2025   40 DbContext  Methods
+---
+8. 3  DBContext 11/21/2025   41 DbContext  Properties
+---
+8. 3  DBContext 11/21/2025   42 DbContext  Properties
+---
+8. 4 Add Entity 11/21/2025   43 Add: Adds the given entity to the context with the Added state. When the changes are saved, the entities in the Added states are inserted into the database. After the changes are saved, the object state changes to Unchanged Example: dbcontext.Students.Add ( studentEntity )
+---
+8. 5 Create 11/21/2025   44 Creates a new instance of an entity for the type of this set. This instance is not added or attached to the set. Example: var  newStudentEntity  =  dbcontext.Students.Create ();
+---
+8. 5 Method of  Dbset  type 11/21/2025   45 Find(int): Uses the primary key value to find an entity tracked by the context. Example: Student  studEntity  =  dbcontext.Students.Find (1);  ity  =  dbcontext.Students.Create ();
+---
+8. 5 Method of  Dbset  type 11/21/2025   46 Include: Returns the included non-generic LINQ to Entities query against a  DbContext . (Inherited from  DbQuery )   Example: var  studentList  =  dbcontext.Students.Include (s =>  s.StudentAddress ). ToList <Student>();
+---
+8. 5 Method of  Dbset  type 11/21/2025   47 Remove: Marks the given entity as Deleted  Example: dbcontext.Students.Remove ( studentEntity );
+---
+8. 5 Method of  Dbset  type 11/21/2025   48 SqlQuery : Creates a raw SQL query that will return entities in this set. Example: var  studentEntity  =  dbcontext.Students.SqlQuery ("select * from student where  studentid  = 1"). FirstOrDefault <Student>();
+---
+8. 6 Saving Data in the Connected Scenario 11/21/2025   49
+---
+8. 6 Saving Data in the Connected Scenario 11/21/2025   50 Insert Data
+---
+8. 6 Saving Data in the Connected Scenario 11/21/2025   51 Updating  Data
+---
+8. 6 Saving Data in the Connected Scenario 11/21/2025   52 Delet ing  Data
+---
+8. 7 Querying in Entity Framework 11/21/2025   53 Entity framework supports three types of queries: 1) LINQ-to-Entities, 2) Entity SQL, and 3) Native SQL. LINQ Method syntax:
+---
+8. 7 Querying in Entity Framework 11/21/2025   54 Entity framework supports three types of queries: 1) LINQ-to-Entities, 2) Entity SQL, and 3) Native SQL. LINQ Query syntax:
+---
+8. 8 Stored Procedure in Entity Framework 11/21/2025   55 Step 1: Create store procedure Step 2: When we add entities database, we select as bellow figure:
+---
+8. 8 Stored Procedure in Entity Framework 11/21/2025   56 Create store procedure When we add entities database, we select as bellow figure:
+---
+8. 8 Stored Procedure in Entity Framework 11/21/2025   57 You can change it by right clicking on  GetCoursesByStudentId  in Function Imports and selecting  Edit .  
+---
+8. 8 Stored Procedure in Entity Framework 11/21/2025   58  
+---
+8. 8 Stored Procedure in Entity Framework 11/21/2025   59 Y ou can use  GetCoursesByStudentId  as a function and get the data, as shown below:  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   60 Create, Update, Delete:  In the EDM designer, right click on the  Student  entity and select  Stored Procedure Mapping  to open Mapping details, as shown below.  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   61 Create, Update, Delete:  Select the appropriate stored procedure for each one in the dropdown, e.g.  sp_InsertStudentInfo  for the Insert function,  sp_UpdateStudent  for the update function, and  sp_DeleteStudent  for the delete function.  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   62 Create, Update, Delete:  sp_InsertStudentInfo  returns the value of  StudentId  and maps it with the  Student  entity's  StudentID , as shown below  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   63 Create, Update, Delete:  we need to validate it before executing to ensure that there will not be a run time error. To accomplish this, right click on the  Student  entity in the designer and click  Validate  and make sure that there are no warnings or errors.  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   64 Create, Update, Delete:  whenever you add, update, or delete the  Student  entity, EF will use these stored procedures for CUD operations, instead of executing SQL commands  
+---
+8. 9 Stored Procedure in Entity Framework 11/21/2025   65 Create, Update, Delete
+---
+11/21/2025   66 “Learning to code can change your life” " Everybody in this country should learn to program  a computer, because it teaches you how to think. “ --  Steve Jobs --
+
+=== FILE: 3. Dependence Injection.pptx ===
+.NET dependency injection
+---
+Dependence Injection  là   gì Dependency injection is a design pattern that allows you to remove hard-coded dependencies and make your application more maintainable and testable. DI is a technique for achieving  Inversion of Control (IoC)  between classes and their dependencies.
+---
+Triển   khai  Dependence Injection Dependency Injection (DI)  là một  design pattern  cho phép cung cấp (inject) các phụ thuộc (dependencies) từ bên ngoài vào một lớp thay vì để lớp đó tự tạo. Mục tiêu:  giảm phụ thuộc chặt chẽ (loose coupling) ,  dễ mở rộng , và  dễ kiểm thử (testability) . Trong  .NET Core , DI là  built-in  (tích hợp sẵn), không cần thêm thư viện ngoài.
+---
+Triển   khai  Dependence Injection 1.  Install Library (Cài  đặt   thư   viện  DI):   Microsoft.Extensions.DependencyInjection   2.  Define Interfaces (Định  nghĩa  interface)  3. Implement the Interface
+---
+Triển   khai  Dependence Injection 4.  Refactor c lasses  to depend on the interface 
+---
+Triển   khai  Dependence Injection 5.  Register Services in DI Container (Program.cs)
+---
+Triển   khai  Dependence Injection 6 .  Inject  StudentBuss  into Form  B ằng   cách   truyền   vào   thông  qua  phương   thức   khởi   tạo . 
+
+=== FILE: Bai_3_Lambda_LINQ_Regular_Expression_CSharp.pptx ===
+BÀI 3 LAMBDA EXPRESSION, LINQ VÀ REGULAR EXPRESSION Truy vấn và kiểm tra dữ liệu trong ứng dụng quản lý sinh viên Dữ liệu List<Student> từ mô hình đã xây dựng ở Bài 2 Kỹ thuật Lambda • LINQ operators • Deferred execution • Regex Giảng viên: Chu Thị Minh Huệ Học phần: Lập trình nâng cao với C#
+---
+BÀI 3 Mục tiêu bài học 02 SAU BÀI HỌC, SINH VIÊN CÓ THỂ SẢN PHẨM CUỐI BUỔI • Viết lambda cho delegate và collection • Truy vấn List<Student> bằng LINQ • Phân biệt query syntax và method syntax • Giải thích deferred execution • Dùng Regex để kiểm tra và trích xuất chuỗi Chức năng tìm kiếm sinh viên: • Kiểm tra từ khóa và mã sinh viên • Lọc theo ngành và khoảng điểm • Sắp xếp kết quả • Phân trang bằng Skip và Take • Thống kê theo chuyên ngành Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Mạch nội dung 03 PHẦN 1: LAMBDA VÀ LINQ PHẦN 2: REGEX VÀ TÍCH HỢP 01  Delegate và anonymous function 02  Lambda expression 03  Query syntax và method syntax 04  LINQ operators 05  Deferred execution 06  Cú pháp Regex 07  Match, Groups và Replace 08  Kiểm tra dữ liệu Student 09  Tìm kiếm tổng hợp 10  Bài thực hành Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Mô hình Student dùng xuyên suốt 04 Bài 3 tiếp tục sử dụng class Student đã xây dựng và kiểm tra ở Bài 2. public class Student {     public string StudentId { get; set; } = "";     public string FullName { get; set; } = "";     public string Email { get; set; } = "";     public string Major { get; set; } = "";     public double Score { get; set; }     public bool IsActive { get; set; } } List<Student> students = StudentData.Create(); GHI NHỚ • Mỗi phần dùng cùng dữ liệu • Lambda xử lý từng Student • LINQ xử lý tập Student • Regex xử lý thuộc tính chuỗi Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Delegate lưu tham chiếu đến hành vi 05 KHAI BÁO METHOD GÁN CHO DELEGATE static bool IsExcellent(Student student) {     return student.Score >= 8.5; } Predicate<Student> condition = IsExcellent; bool result = condition(student); // Predicate<T> nhận T và trả về bool Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Lambda expression 06 Lambda tạo anonymous function bằng toán tử =>. Predicate<Student> isExcellent =     student => student.Score >= 8.5; Func<Student, string> getLabel =     student => $"{student.StudentId} - "                + student.FullName; Action<Student> print =     student => Console.WriteLine(         getLabel(student)); GHI NHỚ • Bên trái là tham số • Bên phải là biểu thức hoặc block • Predicate trả về bool • Func trả kết quả, Action không trả kết quả Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Expression lambda và statement lambda 07 EXPRESSION LAMBDA STATEMENT LAMBDA Func<Student, bool> passed =     s => s.Score >= 5; Func<double, double> square =     x => x * x; Action<Student> print = s => {     string label = $"{s.StudentId}: {s.FullName}";     Console.WriteLine(label); }; Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Func, Action và Predicate 08 FUNC VÀ ACTION PREDICATE Func<Student, string> getName =     s => s.FullName; Func<Student, double, bool> atLeast =     (s, min) => s.Score >= min; Action<string> log =     message => Console.WriteLine(message); Predicate<Student> valid =     s => s.IsActive && s.Score >= 5; // Tương đương: Func<Student, bool> valid2 =     s => s.IsActive && s.Score >= 5; Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Closure trong lambda 09 Lambda có thể sử dụng biến được khai báo ở phạm vi bên ngoài. double minimumScore = 8.0; string selectedMajor = "SE"; Func<Student, bool> condition = student =>     student.Score >= minimumScore     && student.Major == selectedMajor; minimumScore = 8.5; bool accepted = condition(student); GHI NHỚ • Lambda bắt biến bên ngoài • Giá trị hiện tại được dùng khi gọi • Cẩn thận khi thay đổi biến sau đó • Closure có thể kéo dài vòng đời biến Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 LINQ là gì? 10 LANGUAGE INTEGRATED QUERY NGUỒN DỮ LIỆU LINQ tích hợp truy vấn vào C#. Truy vấn có kiểm tra kiểu khi biên dịch và được hỗ trợ bởi IntelliSense. using System.Linq; • Array và List<T> • IEnumerable<T> • XML • Entity Framework Core • Nguồn triển khai IQueryable<T> Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Query syntax và method syntax 11 QUERY SYNTAX METHOD SYNTAX var result =     from s in students     where s.Score >= 8     orderby s.Score descending     select s; var result = students     .Where(s => s.Score >= 8)     .OrderByDescending(s => s.Score); Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Where lọc phần tử 12 Where giữ lại Student thỏa điều kiện lambda. List<Student> result = students     .Where(s => s.IsActive)     .Where(s => s.Score >= 8.0)     .Where(s => s.Major == "SE")     .ToList(); foreach (Student student in result) {     Console.WriteLine(         $"{student.FullName}: {student.Score}"); } GHI NHỚ • Mỗi Where nhận predicate • Có thể nối nhiều điều kiện • ToList thực thi và tạo danh sách • Điều kiện nên dễ đọc Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Select biến đổi dữ liệu 13 Select chiếu mỗi Student thành giá trị hoặc object mới. var summaries = students     .Select(s => new     {         s.StudentId,         s.FullName,         Rank = s.Score switch         {             >= 8.5 => "Giỏi",             >= 7.0 => "Khá",             >= 5.0 => "Đạt",             _ => "Chưa đạt"         }     })     .ToList(); GHI NHỚ • Không làm thay đổi Student gốc • Có thể chọn một property • Anonymous type phù hợp kết quả tạm • DTO phù hợp dữ liệu đi qua các tầng Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Sắp xếp nhiều tiêu chí 14 OrderBy xác định tiêu chí đầu, ThenBy bổ sung tiêu chí tiếp theo. var ordered = students     .OrderBy(s => s.Major)     .ThenByDescending(s => s.Score)     .ThenBy(s => s.FullName)     .ToList(); var topFirst = students     .OrderByDescending(s => s.Score)     .Take(5); GHI NHỚ • OrderBy tăng dần • OrderByDescending giảm dần • ThenBy chỉ dùng sau OrderBy • Chuỗi sắp xếp ổn định và dễ đọc Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 First, Single và giá trị mặc định 15 Chọn toán tử theo số phần tử mà chương trình mong đợi. Student? first = students     .FirstOrDefault(s => s.Score >= 9); Student? byId = students     .SingleOrDefault(s =>         s.StudentId == "SV000001"); if (byId is null)     Console.WriteLine("Không tìm thấy"); GHI NHỚ • First lấy phần tử đầu • Single yêu cầu đúng một phần tử • OrDefault tránh lỗi khi rỗng • Single vẫn lỗi khi có nhiều kết quả Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Any, All và Contains 16 Các toán tử lượng hóa trả về bool thay vì trả danh sách. bool hasExcellent = students     .Any(s => s.Score >= 8.5); bool allHaveEmail = students     .All(s => !string.IsNullOrWhiteSpace(s.Email)); string[] majors = { "SE", "AI" }; bool selected = majors.Contains(student.Major); GHI NHỚ • Any dừng khi tìm thấy một phần tử • All yêu cầu mọi phần tử thỏa mãn • Contains kiểm tra thành viên • Hữu ích cho validation nghiệp vụ Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Count, Sum và Average 17 Aggregation rút gọn một tập dữ liệu thành một kết quả. int activeCount = students     .Count(s => s.IsActive); double average = students     .Where(s => s.IsActive)     .Average(s => s.Score); double highest = students.Max(s => s.Score); double lowest = students.Min(s => s.Score); GHI NHỚ • Count có thể nhận điều kiện • Average lỗi nếu tập rỗng • Kiểm tra Any trước khi tính • Chú ý nullable và dữ liệu thiếu Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 GroupBy theo chuyên ngành 18 GroupBy tạo các nhóm có Key và tập phần tử tương ứng. var statistics = students     .GroupBy(s => s.Major)     .Select(group => new     {         Major = group.Key,         StudentCount = group.Count(),         AverageScore = group.Average(s => s.Score),         HighestScore = group.Max(s => s.Score)     })     .OrderByDescending(x => x.AverageScore)     .ToList(); GHI NHỚ • group.Key là chuyên ngành • Có thể tính thống kê trong nhóm • Select tạo kết quả báo cáo • Phù hợp dashboard và báo cáo Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Skip và Take để phân trang 19 Phân trang ổn định cần sắp xếp trước khi Skip và Take. int pageNumber = 2; int pageSize = 10; List<Student> page = students     .OrderBy(s => s.StudentId)     .Skip((pageNumber - 1) * pageSize)     .Take(pageSize)     .ToList(); GHI NHỚ • Trang bắt đầu từ 1 • Skip bỏ qua các phần tử trước • Take lấy số phần tử cần thiết • Luôn OrderBy để kết quả ổn định Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Deferred execution 20 Truy vấn IEnumerable thường thực thi khi chương trình duyệt kết quả. IEnumerable<Student> query = students     .Where(s => s.Score >= 8); students.Add(new Student {     StudentId = "SV000999",     FullName = "Sinh viên mới",     Score = 9.0 }); foreach (Student s in query)     Console.WriteLine(s.FullName); GHI NHỚ • Khai báo query chưa tạo kết quả • Duyệt query mới thực thi • Dữ liệu mới có thể xuất hiện • ToList tạo snapshot tại thời điểm gọi Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 IEnumerable và IQueryable 21 IEnumerable<T> IQueryable<T> • Thường xử lý collection trong bộ nhớ • Lambda biên dịch thành delegate • LINQ to Objects • ToList tạo kết quả trong bộ nhớ • Nhà cung cấp dịch expression tree • EF Core có thể dịch sang SQL • Không phải method C# nào cũng dịch được • Kiểm tra câu SQL và hiệu năng Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Regular Expression 22 MỤC ĐÍCH API TRONG .NET Regex mô tả mẫu chuỗi để: • Kiểm tra toàn bộ giá trị • Tìm các đoạn phù hợp • Trích xuất nhóm dữ liệu • Thay thế hoặc tách chuỗi using System.Text.RegularExpressions; Regex.IsMatch(input, pattern); Regex.Match(input, pattern); Regex.Matches(input, pattern); Regex.Replace(input, pattern, replacement); Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Các ký hiệu Regex cơ bản 23 VỊ TRÍ VÀ LOẠI KÝ TỰ SỐ LẦN XUẤT HIỆN ^  bắt đầu chuỗi $  kết thúc chuỗi .  ký tự bất kỳ \d chữ số \w chữ, số hoặc _ \s khoảng trắng [ABC] một ký tự trong tập *      0 hoặc nhiều lần +      1 hoặc nhiều lần ?      0 hoặc 1 lần {n}    đúng n lần {m,n}  từ m đến n lần (...)  nhóm |      hoặc Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Kiểm tra mã sinh viên 24 Pattern khóa toàn bộ chuỗi và yêu cầu tiền tố SV cùng sáu chữ số. string pattern = @"^SV\d{6}$"; string id1 = "SV000123"; string id2 = "SV123"; bool valid1 = Regex.IsMatch(id1, pattern); bool valid2 = Regex.IsMatch(id2, pattern); Console.WriteLine(valid1); // True Console.WriteLine(valid2); // False GHI NHỚ • @ tạo verbatim string • ^ bắt đầu, $ kết thúc • SV là chuỗi cố định • \d{6} yêu cầu sáu chữ số Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Trích xuất dữ liệu bằng groups 25 Named groups giúp kết quả dễ đọc hơn chỉ số nhóm. string input = "SV000123-Nguyen An-SE"; string pattern =     @"^(?<id>SV\d{6})-(?<name>[^-]+)-(?<major>[A-Z]{2,5})$"; Match match = Regex.Match(input, pattern); if (match.Success) {     Console.WriteLine(match.Groups["id"].Value);     Console.WriteLine(match.Groups["name"].Value);     Console.WriteLine(match.Groups["major"].Value); } GHI NHỚ • (?<name>...) tạo named group • [^-]+ lấy đến dấu gạch ngang • Success cho biết có khớp • Groups cung cấp dữ liệu đã tách Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Chuẩn hóa khoảng trắng bằng Replace 26 Regex.Replace có thể thay nhiều khoảng trắng liên tiếp bằng một khoảng trắng. string rawName = "  Nguyễn    Văn    An  "; string normalized = Regex.Replace(     rawName.Trim(),     @"\s+",     " "); Console.WriteLine(normalized); // Nguyễn Văn An GHI NHỚ • Trim bỏ khoảng trắng hai đầu • \s+ khớp một hoặc nhiều khoảng trắng • Replace trả về chuỗi mới • string là immutable Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Regex trong Data Annotations 27 Bài 2 và Bài 3 gặp nhau ở RegularExpressionAttribute. public class Student {     [RegularExpression(         @"^SV\d{6}$",         ErrorMessage =             "Mã SV gồm SV và 6 chữ số")]     public string StudentId { get; set; } = ""; } // Validator ở Bài 2 đọc attribute // Regex engine kiểm tra pattern GHI NHỚ • Attribute lưu pattern dưới dạng metadata • Validator kích hoạt kiểm tra • Regex phù hợp quy tắc định dạng • Quy tắc nghiệp vụ đặt ở service Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Kết hợp Regex, Lambda và LINQ 28 Chức năng tìm kiếm lọc theo mã, tên hoặc email bằng cùng một từ khóa. string keyword = "an"; string escaped = Regex.Escape(keyword); var regex = new Regex(escaped,     RegexOptions.IgnoreCase); List<Student> result = students     .Where(s =>         regex.IsMatch(s.StudentId)         || regex.IsMatch(s.FullName)         || regex.IsMatch(s.Email))     .OrderBy(s => s.FullName)     .ToList(); GHI NHỚ • Regex.Escape xử lý từ khóa người dùng • Lambda áp dụng Regex cho từng Student • Where lọc, OrderBy sắp xếp • ToList chốt kết quả Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Sai lầm thường gặp 29 LINQ REGEX • Gọi ToList quá sớm • Dùng Single khi dữ liệu không duy nhất • Quên xử lý tập rỗng trước Average • Truy vấn lại nhiều lần • Viết lambda quá dài • Quên ^ và $ khi kiểm tra toàn chuỗi • Không dùng raw/verbatim string phù hợp • Dùng Regex cho parser phức tạp • Không escape dữ liệu người dùng • Pattern khó đọc, không có test Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+THỰC HÀNH Thực hành 1: truy vấn danh sách sinh viên 30 NHIỆM VỤ Từ List<Student>, lọc sinh viên đang hoạt động có điểm từ 7 trở lên, thuộc ngành SE hoặc AI. Sắp xếp theo điểm giảm dần rồi theo họ tên tăng dần. Tiêu chí hoàn thành Viết cả query syntax và method syntax. So sánh kết quả. Chuyển kết quả sang DTO gồm mã, họ tên, ngành và xếp loại. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+THỰC HÀNH Thực hành 2: tìm kiếm và thống kê 31 NHIỆM VỤ Viết chức năng nhận từ khóa, chuyên ngành, điểm tối thiểu, số trang và kích thước trang. Regex tìm trong mã, họ tên hoặc email; LINQ lọc, sắp xếp và phân trang. Tiêu chí hoàn thành Thống kê thêm số sinh viên và điểm trung bình theo chuyên ngành. Kiểm tra trường hợp từ khóa chứa ký tự Regex đặc biệt. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Tự kiểm tra nhanh 32 CÂU HỎI ĐÁP ÁN NGẮN 1. Lambda khác method có tên thế nào? 2. Where và Select khác nhau ra sao? 3. Khi nào query LINQ thực thi? 4. FirstOrDefault khác SingleOrDefault thế nào? 5. Vì sao nên dùng Regex.Escape? 1. Lambda là hàm ẩn danh. 2. Where lọc, Select biến đổi. 3. Khi duyệt hoặc gọi toán tử thực thi. 4. Single yêu cầu tối đa một kết quả. 5. Để từ khóa được hiểu là văn bản thường. Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+---
+BÀI 3 Kết luận bài 3 33 KIẾN THỨC TRỌNG TÂM CHUẨN BỊ CHO BÀI TIẾP THEO • Lambda biểu diễn hành vi ngắn gọn • LINQ truy vấn collection có kiểm tra kiểu • Where lọc, Select biến đổi • GroupBy tạo báo cáo theo nhóm • Deferred execution ảnh hưởng kết quả • Regex kiểm tra và trích xuất chuỗi Hoàn thiện chức năng tìm kiếm Student. Chuẩn bị: • Windows Forms controls • Event handling • Data binding • ErrorProvider • Tổ chức giao diện quản lý sinh viên Chu Thị Minh Huệ  •  Lập trình nâng cao với C# Lambda • LINQ • Regular Expression
+
